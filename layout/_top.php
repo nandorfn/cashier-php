@@ -19,10 +19,8 @@ isLogin();
 
 <body>
   <div id="app">
-    <div class="main-wrapper main-wrapper-1">
-      <?php
-      require_once '_header.php';
+    <div class="columns" style="height: calc(100vh - 52px);">
+    <?php
       require_once '_sidenav.php';
       ?>
-      <!-- Main Content -->
-      <div class="main-content">
+      <div class="main-content column is-10 pl-0">

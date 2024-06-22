@@ -1,18 +1,53 @@
 <?php
 require_once 'helper/connection.php';
 session_start();
+$email_error = '';
+$password_error = '';
+
 if (isset($_POST['submit'])) {
-  $username = $_POST['username'];
-  $password = $_POST['password'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-  $sql = "SELECT * FROM login WHERE username='$username' and password='$password' LIMIT 1";
-  $result = mysqli_query($connection, $sql);
+    if (empty($email)) {
+        $email_error = "Please input email.";
+    }
+    if (empty($password)) {
+        $password_error = "Please input password.";
+    }
 
-  $row = mysqli_fetch_assoc($result);
-  if ($row) {
-    $_SESSION['login'] = $row;
-    header('Location: index.php');
-  }
+    if (empty($email_error) && empty($password_error)) {
+        $sql = "SELECT * FROM admin WHERE email = ?";
+        $stmt = $connection->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("s", $email);
+
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+
+                if ($result->num_rows === 1) {
+                    $row = $result->fetch_assoc();
+
+                    if (password_verify($password, $row['password'])) {
+                      $_SESSION['login'] = $row;
+                      header('Location: index.php');
+                      exit();
+                    } else {
+                        $password_error = "Email and password invalid";
+                    }
+                } else {
+                    $email_error = "Email and password invalid";
+                }
+            } else {
+                echo "Error: " . $stmt->error;
+            }
+
+            $stmt->close();
+        } else {
+            echo "Error: " . $connection->error;
+        }
+    }
+
+    $connection->close();
 }
 ?>
 
@@ -41,11 +76,13 @@ if (isset($_POST['submit'])) {
             <h4 class="title is-4 has-text-warning has-text-centered">Login Admin</h4>
             <form method="POST" action="">
               <div class="field">
-                <label class="label" for="username">Username</label>
+                <label class="label" for="email">Email</label>
                 <div class="control">
-                  <input id="username" type="text" class="input" name="username" required autofocus>
+                  <input id="email" type="text" class="input" name="email" required autofocus>
                 </div>
-                <p class="help is-danger" style="display: none;">Please input username!</p>
+                <?php if (!empty($email_error)) : ?>
+                  <p class="help is-danger"><?php echo $email_error; ?></p>
+                <?php endif; ?>
               </div>
 
               <div class="field">
@@ -53,17 +90,11 @@ if (isset($_POST['submit'])) {
                 <div class="control">
                   <input id="password" type="password" class="input" name="password" required>
                 </div>
-                <p class="help is-danger" style="display: none;">Please input password!</p>
+                <?php if (!empty($password_error)) : ?>
+                  <p class="help is-danger"><?php echo $password_error; ?></p>
+                <?php endif; ?>
               </div>
-
-              <div class="field">
-                <div class="control">
-                  <label class="checkbox">
-                    <input type="checkbox" name="remember" id="remember-me">
-                    Remember me
-                  </label>
-                </div>
-              </div>
+              <p>Don't have an account? <a href="./register.php">Register here</a></p>
 
               <div class="field">
                 <div class="control">

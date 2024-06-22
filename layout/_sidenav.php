@@ -8,13 +8,15 @@
     <div class="sidebar-brand sidebar-brand-sm">
       <a href="index.php"></a>
     </div>
-    <aside class="menu mt-4">
+    <div style="height: 88vh;" class="menu mt-4 is-flex is-flex-direction-column is-justify-content-space-between">
       <ul class="menu-list">
         <li><a class="nav-link" href="../"><i></i> <span>Dashboard</span></a></li>
-        <li><a class="nav-link" href="../"><i></i> <span>Home</span></a></li>
+        <li><a class="nav-link" href="../store/index.php"><i></i> <span>Store</span></a></li>
         <li><a class="nav-link" href="../product/index.php"><i></i> <span>Product</span></a></li>
-        <li><a class="nav-link" href="../"><i></i> <span>History</span></a></li>
+        <li><a class="nav-link" href="../history/index.php"><i></i> <span>History</span></a></li>
       </ul>
-    </aside>
+
+      <a class="button mx-auto" style="width: 80%;" href="../logout.php">Logout</a>
+    </div>
   </aside>
 </div>

@@ -1,26 +1,36 @@
 <?php
 require_once '../layout/_top.php';
 require_once '../helper/connection.php';
+$admin = isset($_SESSION['login']) ? $_SESSION['login'] : null;
+$admin_id = $admin["id"];
+$result = mysqli_query($connection, "SELECT * FROM product WHERE admin_id = $admin_id");
 
-$result = mysqli_query($connection, "SELECT * FROM product");
+function isValidImageUrl($url) {
+  if (empty($url)) {
+      return false;
+  }
+  return filter_var($url, FILTER_VALIDATE_URL) !== false;
+}
+
+function getImageUrlOrDefault($url) {
+  if (isValidImageUrl($url)) {
+      return $url;
+  } else {
+      return '../assets/images/no-image.png';
+  }
+}
+
+require_once '../layout/_navbar.php';
 ?>
-<!-- Navbar -->
-<nav class="navbar is-warning" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="#">
-      <strong>Product List</strong>
-    </a>
-  </div>
-</nav>
 
 <section class="section">
   <div>
     <button class="button is-warning" onclick="openModal('addModal')">Create Product</button>
-
     <table class="table is-fullwidth">
       <thead>
         <tr>
           <th>ID</th>
+          <th>Image</th>
           <th>Name</th>
           <th>Description</th>
           <th>Price</th>
@@ -31,21 +41,28 @@ $result = mysqli_query($connection, "SELECT * FROM product");
       <tbody>
         <?php
           while ($data = mysqli_fetch_array($result)) :
+            $imageSrc = getImageUrlOrDefault($data['image_url']);
         ?>
         <tr>
-          <td><?= $data['product_id'] ?></td>
+          <td><?= $data['id'] ?></td>
+          <td>
+            <figure class="image is-64x64">
+              <img src="<?= $imageSrc ?>" />
+            </figure>
+              
+          </td>
           <td><?= $data['name'] ?></td>
           <td><?= $data['description'] ?></td>
-          <td><?= $data['price'] ?></td>
+          <td>Rp<?= intval($data['price']) ?></td>
           <td><?= $data['stock'] ?></td>
           <td>
             <div class="buttons">
-              <button class="button is-danger is-small" onclick="openModal('deleteModal')">
+              <button class="button is-danger is-small" onclick="deleteModal(<?= $data['id'] ?>)">
                 <span class="icon">
                   <i class="fas fa-trash"></i>
                 </span>
               </button>
-              <button class="button is-info is-small" onclick="openModal('editModal')">
+              <button class="button is-info is-small" onclick="editModal(<?= $data['id'] ?>)">
                 <span class="icon">
                   <i class="fas fa-edit"></i>
                 </span>
@@ -54,7 +71,6 @@ $result = mysqli_query($connection, "SELECT * FROM product");
           </td>
         </tr>
         <?php
-    $no++;
     endwhile;
   ?>
       </tbody>
@@ -77,12 +93,6 @@ $result = mysqli_query($connection, "SELECT * FROM product");
   <?php
     require_once './delete.php'
   ?>
-  <button class="modal-close is-large" aria-label="close" onclick="closeModal('deleteModal')"></button>
-</div>
-
-<!-- Modal Edit -->
-<div id="editModal" class="modal">
-  <!-- Isi modal edit disini -->
 </div>
 
 <?php
@@ -94,8 +104,20 @@ function openModal(modalId) {
   document.getElementById(modalId).classList.add('is-active');
 }
 
+function deleteModal(productId) {
+  openModal("deleteModal")
+  document.getElementById('confirmDelete').addEventListener('click', function() {
+      window.location.href = './delete.php?delete_id=' + productId;
+      closeModal("deleteModal");
+})
+}
+
+function editModal(productId) {
+  window.location.href = './edit.php?update_id=' + productId;
+}
+
 // Fungsi untuk menutup modal
 function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('is-active');
+    document.getElementById(modalId).classList.remove('is-active');
 }
 </script>

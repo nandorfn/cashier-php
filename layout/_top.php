@@ -1,6 +1,7 @@
 <?php
 require_once '../helper/auth.php';
-
+$admin = isset($_SESSION['login']) ? $_SESSION['login'] : null;
+$admin_id = $admin["id"];
 isLogin();
 ?>
 
